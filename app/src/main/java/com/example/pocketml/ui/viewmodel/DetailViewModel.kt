@@ -1,13 +1,13 @@
 package com.example.pocketml.ui.viewmodel
 
 import android.net.Uri
+import android.text.BoringLayout
 import androidx.lifecycle.*
 import com.example.pocketml.DImageQuery
 import com.example.pocketml.domain.usecases.GetDClasses
 import com.example.pocketml.domain.usecases.GetDImageDetail
 import com.example.pocketml.domain.usecases.SaveDImage
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class DetailViewModel(
     private val getDImageDetail: GetDImageDetail,
@@ -63,6 +63,9 @@ class DetailViewModel(
 
     val isDImageUriValid: LiveData<Boolean> = Transformations.map(dImageUri) { it != null }
 
+    private val _isSaving = MutableLiveData<Boolean>()
+    val isSaving: LiveData<Boolean> = _isSaving
+
     val isDataValid = MediatorLiveData<Boolean>()
 
     init {
@@ -91,6 +94,12 @@ class DetailViewModel(
             return@launch
         }
 
+        if (isSaving.value == true) {
+            return@launch
+        }
+
+        _isSaving.value = true
+
         val dImage = existingDImage.value
 
         val result = saveDImage(
@@ -103,6 +112,8 @@ class DetailViewModel(
         result.exceptionOrNull()?.let {
             _makeSnackbar.value = "Failed to save."
         }
+
+        _isSaving.value = false
 
         result.onSuccess {
             onNavigateToOverview()

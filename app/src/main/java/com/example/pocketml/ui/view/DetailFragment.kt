@@ -32,6 +32,8 @@ class DetailFragment : Fragment() {
     private lateinit var binding: FragmentDatasetManagerDetailBinding
 
     private fun onBind() {
+        binding.saveButton.isEnabled = false
+
         val adapter = ArrayAdapter<String>(
             requireContext(),
             R.layout.list_item_dataset_manager_classes,
@@ -60,7 +62,6 @@ class DetailFragment : Fragment() {
         binding.dClassTextInput.doAfterTextChanged {
             viewModel.setDClassInputText(it.toString())
         }
-
     }
 
     override fun onCreateView(
@@ -83,7 +84,6 @@ class DetailFragment : Fragment() {
 
 
         viewModel.dImageUri.observe(viewLifecycleOwner) { uri ->
-            Timber.d("Observed dImageImageUri: $uri")
             setImage(binding, uri)
         }
 

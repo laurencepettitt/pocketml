@@ -43,7 +43,7 @@ class OverviewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Data binding
-        val binding: FragmentDatasetManagerOverviewBinding = DataBindingUtil.inflate(
+        binding = DataBindingUtil.inflate(
             inflater, R.layout.fragment_dataset_manager_overview, container, false
         )
         binding.lifecycleOwner = this
