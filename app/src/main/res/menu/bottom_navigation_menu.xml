@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item
+      android:id="@+id/navigation_item_dataset"
+      android:enabled="true"
+      android:icon="@drawable/ic_baseline_perm_media_30"
+      android:title="@string/navigation_dataset_text"/>
+  <item
+      android:id="@+id/navigation_item_run"
+      android:enabled="true"
+      android:icon="@drawable/insights_black_36dp"
+      android:title="@string/navigation_run_text"/>
+</menu>

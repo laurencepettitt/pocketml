@@ -1,0 +1,29 @@
+query DImages {
+    dImages {
+        dClass
+        id
+        version
+        url
+    }
+}
+
+query DImage($id: ID!) {
+    dImage(id: $id) {
+        dClass
+        id
+        version
+        url
+    }
+}
+
+query DClasses {
+    dClasses
+}
+
+mutation NewDImage($dClass: ID!, $id: ID!, $version: Int!, $url: String!) {
+    setDImage(dClass: $dClass, id: $id, version: $version, url: $url)
+}
+
+mutation UpdateDImage($dClass: ID, $id: ID!, $version: Int, $url: String) {
+    updateDImage(dClass: $dClass, id: $id, version: $version, url: $url)
+}
