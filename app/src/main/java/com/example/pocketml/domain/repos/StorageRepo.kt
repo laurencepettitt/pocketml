@@ -20,10 +20,8 @@ class StorageRepo(
         val dImageRef = getDImageRef(id, version)
         return try {
             dImageRef.putFile(localUri).await()
-            Timber.d("SHEN: putFile finished")
-            Result.success(dImageRef.downloadUrl.await()) // TODO: construct url manually?
+            Result.success(dImageRef.downloadUrl.await())
         } catch (e: Exception) {
-            Timber.d("SHEN: putFile failed")
             Result.failure(e)
         }
     }

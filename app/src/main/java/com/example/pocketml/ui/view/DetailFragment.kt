@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -19,6 +18,7 @@ import coil.api.load
 import com.example.pocketml.R
 import com.example.pocketml.databinding.FragmentDatasetManagerDetailBinding
 import com.example.pocketml.ui.viewmodel.DetailViewModel
+import com.google.android.material.snackbar.Snackbar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -29,18 +29,9 @@ class DetailFragment : Fragment() {
     private val viewModel: DetailViewModel by viewModel()
     private val args: DetailFragmentArgs by navArgs()
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val binding: FragmentDatasetManagerDetailBinding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_dataset_manager_detail, container, false
-        )
-        binding.lifecycleOwner = this
+    private lateinit var binding: FragmentDatasetManagerDetailBinding
 
-        viewModel.setId(args.id)
-
+    private fun onBind() {
         val adapter = ArrayAdapter<String>(
             requireContext(),
             R.layout.list_item_dataset_manager_classes,
@@ -54,6 +45,43 @@ class DetailFragment : Fragment() {
         // Set Adapter for classes suggestions
         (binding.dClassTextInput as? AutoCompleteTextView)?.setAdapter(adapter)
 
+        binding.dImageView.setOnClickListener {
+            selectImage()
+        }
+
+        binding.saveButton.setOnClickListener {
+            viewModel.onSave()
+        }
+
+        binding.cancelButton.setOnClickListener {
+            viewModel.onNavigateToOverview()
+        }
+
+        binding.dClassTextInput.doAfterTextChanged {
+            viewModel.setDClassInputText(it.toString())
+        }
+
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = DataBindingUtil.inflate(
+            inflater, R.layout.fragment_dataset_manager_detail, container, false
+        )
+        binding.lifecycleOwner = this
+        onBind()
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel.setId(args.id)
+
+
         viewModel.dImageUri.observe(viewLifecycleOwner) { uri ->
             Timber.d("Observed dImageImageUri: $uri")
             setImage(binding, uri)
@@ -63,28 +91,12 @@ class DetailFragment : Fragment() {
             binding.dClassTextInput.setText(dImage?.dClass)
         }
 
-        binding.dImageView.setOnClickListener {
-            selectImage()
-        }
-
-        binding.saveButton.setOnClickListener {
-            viewModel.onSave()
-        }
-
         viewModel.navigateToOverview.observe(viewLifecycleOwner, {
             if (it) {
                 findNavController().popBackStack()
                 viewModel.doneNavigateToOverview()
             }
         })
-
-        binding.cancelButton.setOnClickListener {
-            viewModel.onNavigateToOverview()
-        }
-
-        binding.dClassTextInput.doAfterTextChanged {
-            viewModel.setDClassInputText(it.toString())
-        }
 
         viewModel.isDClassInputTextValid.observe(viewLifecycleOwner) {
             binding.dClassTextInput.error =
@@ -97,12 +109,11 @@ class DetailFragment : Fragment() {
 
         viewModel.makeToast.observe(viewLifecycleOwner) {
             it?.let {
-                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                viewModel.doneMakingToast()
+                val contextView = binding.saveButton
+                Snackbar.make(contextView, it, Snackbar.LENGTH_LONG).show()
+                viewModel.doneMakingSnackbar()
             }
         }
-
-        return binding.root
     }
 
     private fun setImage(binding: FragmentDatasetManagerDetailBinding, uri: Uri?) {

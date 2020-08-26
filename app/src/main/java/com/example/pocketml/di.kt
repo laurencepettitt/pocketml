@@ -25,7 +25,7 @@ val diModule = module {
     single { GetDImageDetail(get()) }
     single { GetDImagesList(get()) }
     single { GetDClasses(get()) }
-    single { saveDImage(get()) }
+    single { SaveDImage(get()) }
 
     viewModel { OverviewViewModel(get()) }
     viewModel { DetailViewModel(get(), get(), get()) }

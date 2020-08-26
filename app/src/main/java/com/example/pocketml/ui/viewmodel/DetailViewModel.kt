@@ -5,22 +5,24 @@ import androidx.lifecycle.*
 import com.example.pocketml.DImageQuery
 import com.example.pocketml.domain.usecases.GetDClasses
 import com.example.pocketml.domain.usecases.GetDImageDetail
-import com.example.pocketml.domain.usecases.saveDImage
+import com.example.pocketml.domain.usecases.SaveDImage
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class DetailViewModel(
     private val getDImageDetail: GetDImageDetail,
     private val getDClasses: GetDClasses,
-    private val saveDImage: saveDImage
+    private val saveDImage: SaveDImage
 ) : ViewModel() {
 
-    private val _existingId = MutableLiveData<String?>()
-    val existingId: LiveData<String?> = _existingId
+    private val _existingId = MutableLiveData<String>()
+    val existingId: LiveData<String> = _existingId
 
-    val existingDImage: LiveData<DImageQuery.DImage?> = existingId.switchMap {
+    val existingDImage: LiveData<DImageQuery.DImage> = existingId.switchMap { id ->
         liveData {
-            emit(it?.let { getDImageDetail(it).getOrNull() })
+            getDImageDetail(id).getOrNull()?.let { dImage ->
+                emit(dImage)
+            }
         }
     }
 
@@ -43,9 +45,11 @@ class DetailViewModel(
         }
     }
 
-    var dClasses: LiveData<List<String>?> = existingId.switchMap {
+    var dClasses: LiveData<List<String>> = existingId.switchMap {
         liveData {
-            emit(getDClasses().getOrNull())
+            getDClasses().getOrNull()?.let { dClasses ->
+                emit(dClasses)
+            }
         }
     }
 
@@ -73,8 +77,8 @@ class DetailViewModel(
     private val _navigateToOverview = MutableLiveData<Boolean>()
     val navigateToOverview: LiveData<Boolean> = _navigateToOverview
 
-    private val _makeToast = MutableLiveData<String?>()
-    val makeToast: LiveData<String?> = _makeToast
+    private val _makeSnackbar = MutableLiveData<String?>()
+    val makeToast: LiveData<String?> = _makeSnackbar
 
     fun setLocalDImageUri(uri: Uri) {
         localDImageUri.value = uri
@@ -82,7 +86,7 @@ class DetailViewModel(
 
     fun onSave() = viewModelScope.launch() {
         if (isDataValid.value != true) {
-            _makeToast.value =
+            _makeSnackbar.value =
                 "Sorry, you can't save without setting an image and valid class name."
             return@launch
         }
@@ -93,7 +97,7 @@ class DetailViewModel(
             dClass = dClassInputText.value,
             id = dImage?.id,
             version = dImage?.version,
-            uri = dImageUri.value
+            localUri = localDImageUri.value
         )
         result.exceptionOrNull()?.let {
             Timber.d(it)
@@ -103,12 +107,14 @@ class DetailViewModel(
     }
 
     fun setId(id: String?) {
-        _existingId.value = id
+        id?.let {
+            _existingId.value = id
+        }
     }
 
     fun onReset() {
-        _existingId.value = null
-        localDImageUri.value = null
+//        _existingId.value = null
+//        localDImageUri.value = null
     }
 
     fun onNavigateToOverview() {
@@ -124,7 +130,7 @@ class DetailViewModel(
         _dClassInputText.value = dClassText
     }
 
-    fun doneMakingToast() {
-        _makeToast.value = null
+    fun doneMakingSnackbar() {
+        _makeSnackbar.value = null
     }
 }

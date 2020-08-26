@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PocketML</string>
     <string name="add_to_database">Add to database.</string>
-    <string name="dataset_example_image">Dataset example image/</string>
+    <string name="dataset_example_image">Dataset example image</string>
     <string name="save_button">Save</string>
     <string name="add_class_text">Class</string>
     <string name="delete_button">Delete</string>

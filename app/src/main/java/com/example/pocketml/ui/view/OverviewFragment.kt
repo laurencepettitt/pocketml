@@ -18,6 +18,25 @@ class OverviewFragment : Fragment() {
 
     private val viewModel: OverviewViewModel by sharedViewModel()
 
+    private lateinit var binding: FragmentDatasetManagerOverviewBinding
+
+    private lateinit var overviewAdapter: OverviewAdapter
+
+    private fun onBind() {
+        val manager = GridLayoutManager(activity, 3)
+        binding.datasetList.layoutManager = manager
+        overviewAdapter = OverviewAdapter(DImageClickListener { dImage ->
+            viewModel.onDImageClicked(dImage)
+        })
+        binding.datasetList.adapter = overviewAdapter
+
+        binding.addToDatasetFab.setOnClickListener {
+            findNavController().navigate(
+                OverviewFragmentDirections.actionOverviewFragmentToDetailFragment(null)
+            )
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -28,37 +47,25 @@ class OverviewFragment : Fragment() {
             inflater, R.layout.fragment_dataset_manager_overview, container, false
         )
         binding.lifecycleOwner = this
+        onBind()
+        return binding.root
+    }
 
-        // RecyclerView layout manager
-        val manager = GridLayoutManager(activity, 3)
-        binding.datasetList.layoutManager = manager
-
-        // RecyclerView Adapter
-        val adapter = OverviewAdapter(DImageClickListener { dImage ->
-            viewModel.onDImageClicked(dImage)
-        })
-        binding.datasetList.adapter = adapter
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         viewModel.dImages.observe(viewLifecycleOwner) { dImages: List<DImagesQuery.DImage> ->
-            adapter.submitList(dImages)
+            overviewAdapter.submitList(dImages)
         }
 
         viewModel.selectedDImage.observe(viewLifecycleOwner) { dImageId: String? ->
-            dImageId?.let{
+            dImageId?.let {
                 findNavController().navigate(
                     OverviewFragmentDirections.actionOverviewFragmentToDetailFragment(dImageId)
                 )
                 viewModel.doneDImageDetailNavigated()
             }
         }
-
-        binding.addToDatasetFab.setOnClickListener {
-            findNavController().navigate(
-                OverviewFragmentDirections.actionOverviewFragmentToDetailFragment(null)
-            )
-        }
-
-        return binding.root
     }
 
     override fun onResume() {
