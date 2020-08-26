@@ -99,11 +99,14 @@ class DetailViewModel(
             version = dImage?.version,
             localUri = localDImageUri.value
         )
+
         result.exceptionOrNull()?.let {
-            Timber.d(it)
+            _makeSnackbar.value = "Failed to save."
         }
 
-        onNavigateToOverview()
+        result.onSuccess {
+            onNavigateToOverview()
+        }
     }
 
     fun setId(id: String?) {
